@@ -2,9 +2,6 @@ import java.io.*;
 import net.java.games.input.*;
 
 
-import org.lwjgl.util.*;
-import org.lwjgl.util.input.ControllerAdapter;
-
 public class MyController {
 	public static void main( String args[]) {
 		Controller[] ca = ControllerEnvironment.getDefaultEnvironment().getControllers();
