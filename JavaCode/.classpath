@@ -12,5 +12,10 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Batman/Documents/ASME/Design Contest/ASMEDesignContest2013/JavaIncludes/lwjgl-2.8.4/native/windows"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Batman/Documents/ASME/Design Contest/ASMEDesignContest2013/JavaIncludes/rxtx-2.1-7-bins-r2/RXTXcomm.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Batman/Documents/ASME/Design Contest/ASMEDesignContest2013/JavaIncludes/rxtx-2.1-7-bins-r2"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

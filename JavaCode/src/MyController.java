@@ -34,6 +34,9 @@ public class MyController {
 			}
 		}
 
+		SerialTest tester = new SerialTest();
+		
+		
 		while(true) {
 			Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
 			if(controllers.length==0) {
@@ -72,6 +75,7 @@ public class MyController {
 				e.printStackTrace();
 			}
 		}
+		
 	}
 
 }
