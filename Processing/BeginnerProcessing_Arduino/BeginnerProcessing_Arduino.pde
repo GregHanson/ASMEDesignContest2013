@@ -1,9 +1,14 @@
 import cc.arduino.*;
 import procontroll.*;
+import processing.serial.*;
 
 Arduino arduino;
 
 ControllIO controll;
+
+// Change this depending on Operating System
+private int usingController = 1;  // 1: XBOX controller with windows
+                                  // 2: XBOX controller with mac
 
 private ControllDevice gamepad;
 public ControllStick leftStick;
@@ -29,13 +34,17 @@ private ControllButton R2;
 private ControllButton R3;
 private ControllButton Select;
 private ControllButton Start;
-private ControllButton Up;
-private ControllButton Down;
-private ControllButton Left;
-private ControllButton Right;
+private ControllButton DPadUp;
+private ControllButton DPadDown;
+private ControllButton DPadLeft;
+private ControllButton DPadRight;
+
 
 boolean yPressed, bPressed, aPressed, xPressed;
+boolean l1Pressed, r1Pressed;
 boolean dUpPressed, dDownPressed, dLeftPressed, dRightPressed;
+boolean rjsPressed, ljsPressed;
+float leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY;
 
 int STBY = 10; //standby
 
@@ -56,6 +65,7 @@ void setup()
 {
   /*
   println(Arduino.list());
+  
   arduino = new Arduino(this, Arduino.list()[0], 57600);
   //arduino.pinMode(ledPin, Arduino.OUTPUT);
   
@@ -70,9 +80,22 @@ void setup()
   arduino.pinMode(BIN2, Arduino.OUTPUT);
   */
   controll = ControllIO.getInstance(this);
-  mapXBOXwindows();
+  
+  if(usingController == 1){
+    mapXBOXwindows();
+  }
+  else if(usingController == 2){
+    mapXBOXmac();
+  }
+  
   yPressed = bPressed = aPressed = xPressed = false;
   dUpPressed = dDownPressed = dLeftPressed = dRightPressed = false;
+  l1Pressed = r1Pressed = false;
+  rjsPressed = ljsPressed = false;
+  leftJoystickX = leftX();
+  leftJoystickY = leftY();
+  rightJoystickX = rightX();
+  rightJoystickY = rightY();
   println("Starting");
 }
 
@@ -89,7 +112,29 @@ void getControllerState(){
   
   checkDPad();
 
-  //checkLeftJoyStick(); 
+  checkLeftJoyStick();
+  
+  checkRightJoyStick();
+  
+  checkBumpers();
+  
+}
+
+void checkBumpers(){
+ if(L1() && !l1Pressed){
+  println("Left bumper pressed");
+    l1Pressed = true; 
+  }
+  else if(!L1()){
+   l1Pressed = false; 
+  } 
+ if(R1() && !r1Pressed){
+  println("Right bumper pressed"); 
+    r1Pressed = true; 
+  }
+  else if(!R1()){
+   r1Pressed = false; 
+  }
 }
 
 void checkLeftJoyStick(){
@@ -97,7 +142,41 @@ void checkLeftJoyStick(){
   float x = leftX();
   float y = leftY();
   
-  println("Y:  " + y + "     X:  " + x);
+  if(L3() && !ljsPressed){
+   println("Left Joystick Pressed");
+    ljsPressed = true; 
+  }
+  else if(!L3()){
+   ljsPressed = false; 
+  }
+  
+  if(leftJoystickX != x || leftJoystickY != y){
+    println("Y:  " + y + "     X:  " + x);
+    leftJoystickX = x;
+    leftJoystickY = y;
+  }
+
+}
+
+void checkRightJoyStick(){
+  
+  float x = rightX();
+  float y = rightY();
+  
+  if(R3() && !rjsPressed){
+   println("Right Joystick Pressed");
+    rjsPressed = true; 
+  }
+  else if(!R3()){
+   rjsPressed = false; 
+  }
+  
+  if(rightJoystickX != x || rightJoystickY != y){
+    println("Y:  " + y + "     X:  " + x);
+    rightJoystickX = x;
+    rightJoystickY = y;
+  }
+  
 }
 
 void checkDPad(){
@@ -160,6 +239,70 @@ void checkButtons(){
   else if (!X()){
    xPressed = false; 
   } 
+}
+
+void mapXBOXmac(){
+  
+  gamepad = controll.getDevice("Controller");
+  //printDeviceItems();
+  gamepad.setTolerance(0.05f);  //was 0.5f.
+  gamepad.printSliders();
+  gamepad.printButtons();
+  Y = gamepad.getButton(14);
+  B = gamepad.getButton(12);
+  A = gamepad.getButton(11);
+  X = gamepad.getButton(13);
+  Select = gamepad.getButton(5);
+  Start = gamepad.getButton(4);
+  DPadUp = gamepad.getButton(0);
+  DPadDown = gamepad.getButton(1);
+  DPadLeft = gamepad.getButton(2);
+  DPadRight = gamepad.getButton(3);
+  
+  // Following code needs to be debugged
+  R1 = gamepad.getButton(5);
+  R3 = gamepad.getButton(9);
+  L1 = gamepad.getButton(4);
+  L3 = gamepad.getButton(8);
+  leftStick = new ControllStick(gamepad.getSlider(0), gamepad.getSlider(1));
+  rightStick = new ControllStick(gamepad.getSlider(2), gamepad.getSlider(3));
+  XBOXTrig = gamepad.getSlider(4);
+  leftTriggerTolerance = rightTriggerTolerance = XBOXTrig.getTolerance();
+  leftTriggerMultiplier = rightTriggerMultiplier = XBOXTrig.getMultiplier();
+  
+  /* ---- Example code from http://www.blairkelly.ca/2012/04/20/arduino-wifly-mini-processing-code/
+     ---- for mapping 360 controller on a mac
+  //sliders
+  sliderWheel = controlDevice.getSlider(2);
+  sliderThrottle = controlDevice.getSlider(5);
+  sliderReverse = controlDevice.getSlider(4);
+  sliderCameraX = controlDevice.getSlider(0);
+  //buttons
+  buttonStart = controlDevice.getButton(4);      //START BUTTON
+  buttonESC = controlDevice.getButton(5);     //BACK BUTTON
+  buttonSendSettings = controlDevice.getButton(4); //start button, clutch must be in.
+  buttonResetOnFlatline = controlDevice.getButton(5);      //back BUTTON (clutch must be in for this one to work).
+ 
+  buttonGEARUP = controlDevice.getButton(9);        //RB
+  buttonGEARDOWN = controlDevice.getButton(8);       //LB
+ 
+  buttonCLUTCH = controlDevice.getButton(7);    //RJD
+ 
+  buttonCentreCamera = controlDevice.getButton(6);    //LJD (also pressed to adjust camera trim).
+  buttonAutoCamera = controlDevice.getButton(11);    //A. autoCamera ON/OFF
+  buttonCameraMoveLeft = controlDevice.getButton(13);       //X
+  buttonCameraMoveRight = controlDevice.getButton(12);        //B
+ 
+  buttonCalibrateSensors = controlDevice.getButton(14);        //Y  (clutch must be in. calibrates sensors. Vehicle should be stopped!!)
+  buttonSendFFaccels = controlDevice.getButton(14);        //Y (when clutch is NOT in).
+ 
+  //cooliehat
+  //handled by cooliehat: steering trim (when clutch is depressed) and camera trim (when cameraCentre is depressed).
+  coolieUP = controlDevice.getButton(0);    //cooliehat UP
+  coolieDOWN = controlDevice.getButton(1);    //cooliehat DOWN
+  coolieLEFT = controlDevice.getButton(2);    //cooliehat LEFT
+  coolieRIGHT = controlDevice.getButton(3);    //cooliehat RIGHT 
+  */
 }
 
 void mapXBOXwindows()
@@ -362,28 +505,28 @@ boolean Select() { return Select.pressed(); }
 
 boolean DUp()
 {
-  if ( Up != null ) return Up.pressed();
+  if ( DPadUp != null ) return DPadUp.pressed();
   else if ( DPad != null ) return DPad.getY() < 0;
   else return false;
 }
 
 boolean DDown()
 {
-  if ( Down != null ) return Down.pressed();
+  if ( DPadDown != null ) return DPadDown.pressed();
   else if ( DPad != null ) return DPad.getY() > 0;
   else return false;
 }
 
 boolean DLeft()
 {
-  if ( Left != null ) return Left.pressed();
+  if ( DPadLeft != null ) return DPadLeft.pressed();
   else if ( DPad != null ) return DPad.getX() < 0;
   else return false;
 }
 
 boolean DRight()
 {
-  if ( Right != null ) return Right.pressed();
+  if ( DPadRight != null ) return DPadRight.pressed();
   else if ( DPad != null ) return DPad.getX() > 0;
   else return false;
 }

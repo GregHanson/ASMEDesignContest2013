@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>hint() \ Language (API) \ Processing 2+</title>
+		
+		<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+		<link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="Author" content="Casey Reas &amp; Ben Fry" />
+		<meta name="Publisher" content="Processing" />
+
+		<meta name="Keywords" content="Processing, Processing, Interactive Media, Electronic Arts, Programming, Java, Ben Fry, Casey Reas" />
+		<meta name="Description" content="Processing is an electronic sketchbook for developing 
+				ideas. It is a context for learning fundamentals of computer programming 
+				within the context of the electronic arts." />
+		<meta name="Copyright" content="All contents copyright Ben Fry, Casey Reas,  MIT Media Laboratory" />
+	
+		<link href="css/style.css" rel="stylesheet" type="text/css" />
+	</head>
+	<body id="Langauge-en" onload="" >
+		
+		<!-- ==================================== PAGE ============================ --> 
+		<div id="container">
+
+	
+			<!-- ==================================== HEADER ============================ --> 
+			<div id="header">
+				<a href="http://processing.org/"><img src="img/processing.gif" alt="Processing" title="Processing.org" /></a>
+				<form name="search" method="get" action="http://www.google.com/search">
+				       <p><input type="hidden" name="as_sitesearch" value="processing.org" />
+				       <input type="text" name="as_q" value="" size="20" class="text" /> 
+				       <input type="submit" value="Search" /></p>
+				</form>
+			</div> 
+			<div id="navigation">
+				<div class="navBar" id="mainnav_noSub">
+	<a href="index.html" class='active'>Language</a>
+	(<a href="alpha.html" >A-Z</a>) \
+	<a href="libraries/index.html" >Libraries</a> \
+	<a href="tools/index.html">Tools</a> \
+	<a href="environment/index.html">Environment</a>
+</div>
+
+			</div>
+
+		
+			<a id="TOP" name="TOP"></a>
+			
+			<!-- ==================================== CONTENT - Headers ============================ -->
+			<div class="content">
+			
+			 <p class="ref-notice">This reference is for Processing 2.0+. If you have a previous version, use the reference included with your software. If you see any errors or have suggestions, <a href="http://code.google.com/p/processing/issues/list">please let us know</a>. If you prefer a more technical reference, visit the <a href="http://processing.googlecode.com/svn/trunk/processing/build/javadoc/core/index.html">Processing Javadoc</a>.</p>
+
+<table cellpadding="0" cellspacing="0" border="0" class="ref-item">
+	
+
+	<tr class="name-row">
+		<th scope="row">Name</th>
+
+		<td><h3>hint()</h3></td>
+	</tr>
+
+	<tr class="">
+		
+
+	<tr class="">
+		<th scope="row">Description</th>
+		<td>
+Set various hints and hacks for the renderer. This is used to handle obscure rendering features that cannot be implemented in a consistent manner across renderers. Each hint is enabled with the "ENABLE" syntax and disabled with "DISABLE." Some are enabled by default and other are disabled. For example, to turn on native fonts, use <b>hint(ENABLE_NATIVE_FONTS)</b> and later use <b>hint(DISABLE_NATIVE_FONTS)</b> to stop using the feature. Some options might graduate to standard features instead of hints over time.
+<br/><br/>
+hint(ENABLE_NATIVE_FONTS) - Use the native version fonts when they are installed, rather than the bitmapped version from a .vlw file. This is useful with the default renderer setting, as it will improve font rendering speed. This is not enabled by default, because it can be misleading while testing because the type will look great on your machine (because you have the font installed) but lousy on others' machines if the identical font is unavailable. This option can only be set per-sketch, and must be called before any use of textFont().
+<br/><br/>
+hint(DISABLE_DEPTH_TEST) - Disable the zbuffer, allowing you to draw on top of everything at will. When depth testing is disabled, items will be drawn to the screen sequentially, like a painting. This hint is most often used to draw in 3D, then draw in 2D on top of it (for instance, to draw GUI controls in 2D on top of a 3D interface). Starting in release 0149, this will also clear the depth buffer. Restore the default with hint(ENABLE_DEPTH_TEST), but note that with the depth buffer cleared, any 3D drawing that happens later in draw() will ignore existing shapes on the screen.
+<br/><br/>
+hint(ENABLE_DEPTH_SORT) - Enable primitive z-sorting of triangles and lines in P3D. This can slow performance considerably, and the algorithm is not yet perfect.
+<br/> <br/>
+hint(DISABLE_OPENGL_ERRORS) - Speeds up the P3D renderer setting by not checking for errors while running. Undo with hint(ENABLE_OPENGL_ERRORS).
+<br/><br/>
+hint(ENABLE_ACCURATE_TEXTURES) - Enables better texture accuracy for the P3D renderer. This option will do a better job of dealing with textures in perspective. hint(DISABLE_ACCURATE_TEXTURES) returns to the default. This hint is not likely to last long.
+<br/><br/>
+hint(DISABLE_DEPTH_MASK) - Description to come...
+<br/> <br/>
+hint(ENABLE_ACCURATE_2D) - Description to come...
+<br/><br/>
+hint(DISABLE_TEXTURE_CACHE) - Description to come...
+<br/> <br/>
+hint(DISABLE_TRANSFORM_CACHE) - Description to come...
+<br/><br/>
+hint(ENABLE_STROKE_PERSPECTIVE) - Description to come...
+<br/> <br/>
+hint(DISABLE_TEXTURE_MIPMAPS) - Description to come...
+<br/> <br/>
+hint(ENABLE_STROKE_PURE) - Improves rendering glitches with <b>vertex()</b> in the default renderer
+<br/><br/>
+As of release 0149, unhint() has been removed in favor of adding additional ENABLE/DISABLE constants to reset the default behavior. This prevents the double negatives, and also reinforces which hints can be enabled or disabled.
+<br /><br />
+</td>
+	</tr>
+
+	<tr class=""><th scope="row">Syntax</th><td><pre>hint(<kbd>which</kbd>)</pre></td></tr>
+
+	<tr class="">	<th scope="row">Parameters</th><td><table cellpadding="0" cellspacing="0" border="0"><tr class="">
+<th scope="row">which</th>
+<td>int: name of the hint to be enabled or disabled</td>
+</tr></table></td>	</tr>
+	<tr class=""><th scope="row">Returns</th><td>void</td></tr>
+	<tr class=""><th scope="row">Related</th><td><a href="PGraphics.html">PGraphics</a><br />
+<a href="createGraphics_.html">createGraphics()</a><br />
+<a href="size_.html">size()</a><br /></td></tr>
+</table>
+
+Updated on October 31, 2012 08:19:19am PDT<br /><br />
+
+<!-- Creative Commons License -->
+
+<div class="license">
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.0/"><img alt="Creative Commons License" border="0" src="http://creativecommons.org/images/public/somerights20.gif" /></a>
+</div>
+<!--
+
+<rdf:RDF xmlns="http://web.resource.org/cc/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Work rdf:about="">
+   <dc:title>Processing.org Reference</dc:title>
+   <dc:date>2004</dc:date>
+   <dc:description>Reference for the Processing.org programming environment and language.</dc:description>
+   <dc:creator><Agent>
+      <dc:title>Casey Reas et al.</dc:title>
+   </Agent></dc:creator>
+   <dc:rights><Agent>
+      <dc:title>Casey Reas</dc:title>
+   </Agent></dc:rights>
+   <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+   <license rdf:resource="http://creativecommons.org/licenses/by-nc-sa/2.0/" />
+</Work>
+
+<License rdf:about="http://creativecommons.org/licenses/by-nc-sa/2.0/">
+   <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+   <permits rdf:resource="http://web.resource.org/cc/Distribution" />
+   <requires rdf:resource="http://web.resource.org/cc/Notice" />
+   <requires rdf:resource="http://web.resource.org/cc/Attribution" />
+   <prohibits rdf:resource="http://web.resource.org/cc/CommercialUse" />
+   <permits rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+   <requires rdf:resource="http://web.resource.org/cc/ShareAlike" />
+</License>
+
+</rdf:RDF>
+
+-->
+			
+			</div>
+
+			<!-- ==================================== FOOTER ============================ --> 
+  			<div id="footer">
+
+    			<div id="copyright">Processing is an open project intiated by <a href="http://benfry.com/">Ben Fry</a> and <a href="http://reas.com">Casey Reas</a>. It is developed by a <a href="http://processing.org/about/people/">small team of volunteers</a>.</div> 
+    			<div id="colophon">
+
+                    <a href="copyright.html">&copy; Info</a> \ 
+
+                    <span>Site hosted by <a href="http://www.mediatemple.net">Media Temple!</a></span>
+
+                </div>
+  			</div>
+  			
+		</div>
+	</body>
+</html>
