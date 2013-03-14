@@ -1,3 +1,5 @@
+//#include <Servo.h>
+
 import cc.arduino.*;
 import procontroll.*;
 import processing.serial.*;
@@ -44,41 +46,87 @@ boolean yPressed, bPressed, aPressed, xPressed;
 boolean l1Pressed, r1Pressed;
 boolean dUpPressed, dDownPressed, dLeftPressed, dRightPressed;
 boolean rjsPressed, ljsPressed;
+boolean ltPressed, rtPressed;
 float leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY;
 
 int STBY = 10; //standby
 
-//Motor A
-int PWMA = 3; //Speed control 
-int AIN1 = 9; //Direction
-int AIN2 = 8; //Direction
+////Motor A
+//int PWMA = 3; //Speed control 
+//int AIN1 = 9; //Direction
+//int AIN2 = 8; //Direction
+//
+////Motor B
+//int PWMB = 5; //Speed control
+//int BIN1 = 11; //Direction
+//int BIN2 = 12; //Direction
 
-//Motor B
-int PWMB = 5; //Speed control
-int BIN1 = 11; //Direction
-int BIN2 = 12; //Direction
+//Left Hand Motors
+int PWMLeft = 3; //Speed control 
+int LeftIN1 = 7; //Direction
+int LeftIN2 = 8; //Direction
 
-int speed = 128;
+//Right Hand Motors
+int PWMRight = 5; //Speed control
+int RightIN1 = 13; //Direction
+int RightIN2 = 12; //Direction
 
+//Claw servo
+int ClawOpen = 11;
+int ClawUp = 9;
+
+//Servo ClawServo;
+
+//car commands
+final int left = 1;
+final int right = 2;
+final int forward = 3;
+final int backward = 4;
+
+int MAX_SPEED = 255;
+
+final int LOW = Arduino.LOW;
+final int HIGH = Arduino.HIGH;
+
+final int SERVOMIN = 0;
+final int SERVOMAX = 180;
+
+int clawOpenVal = 0;
+int clawUpVal = 0;
 
 void setup()
 {
-  /*
-  println(Arduino.list());
   
-  arduino = new Arduino(this, Arduino.list()[0], 57600);
-  //arduino.pinMode(ledPin, Arduino.OUTPUT);
-  
-  arduino.pinMode(STBY, Arduino.OUTPUT);
-
-  arduino.pinMode(PWMA, Arduino.OUTPUT);
-  arduino.pinMode(AIN1, Arduino.OUTPUT);
-  arduino.pinMode(AIN2, Arduino.OUTPUT);
-
-  arduino.pinMode(PWMB, Arduino.OUTPUT);
-  arduino.pinMode(BIN1, Arduino.OUTPUT);
-  arduino.pinMode(BIN2, Arduino.OUTPUT);
-  */
+//  println(Arduino.list());
+//  
+//  arduino = new Arduino(this, Arduino.list()[0], 57600);
+//  /*
+//  //arduino.pinMode(ledPin, Arduino.OUTPUT);
+//  
+//  arduino.pinMode(STBY, Arduino.OUTPUT);
+//
+//  arduino.pinMode(PWMA, Arduino.OUTPUT);
+//  arduino.pinMode(AIN1, Arduino.OUTPUT);
+//  arduino.pinMode(AIN2, Arduino.OUTPUT);
+//
+//  arduino.pinMode(PWMB, Arduino.OUTPUT);
+//  arduino.pinMode(BIN1, Arduino.OUTPUT);
+//  arduino.pinMode(BIN2, Arduino.OUTPUT);
+//  */
+//  
+//  arduino.pinMode(STBY, Arduino.OUTPUT);
+//
+//  arduino.pinMode(ClawOpen, Arduino.OUTPUT);
+//  arduino.pinMode(ClawUp, Arduino.OUTPUT);
+//
+//  arduino.pinMode(PWMLeft, Arduino.OUTPUT);
+//  arduino.pinMode(LeftIN1, Arduino.OUTPUT);
+//  arduino.pinMode(LeftIN2, Arduino.OUTPUT);
+//
+//  arduino.pinMode(PWMRight, Arduino.OUTPUT);
+//  arduino.pinMode(RightIN1, Arduino.OUTPUT);
+//  arduino.pinMode(RightIN2, Arduino.OUTPUT);
+    
   controll = ControllIO.getInstance(this);
   
   if(usingController == 1){
@@ -92,6 +140,7 @@ void setup()
   dUpPressed = dDownPressed = dLeftPressed = dRightPressed = false;
   l1Pressed = r1Pressed = false;
   rjsPressed = ljsPressed = false;
+  ltPressed = rtPressed = false;
   leftJoystickX = leftX();
   leftJoystickY = leftY();
   rightJoystickX = rightX();
@@ -104,7 +153,203 @@ void draw()
 
   getControllerState();
 
-  delay(50);
+  //motorBoat();
+
+  //delay(50);
+}
+
+void motorBoat(){
+  move(forward, 128);
+  motorWait();
+  
+//  move(backward, 128);
+//  motorWait();
+//  
+//  move(left, 128);
+//  motorWait();
+//  
+//  move(right, 128);
+//  motorWait(); 
+}
+
+void motorWait(){
+  delay(50); //go for 1 second
+  stop(); //stop
+  delay(50); //hold for 250ms until move again 
+}
+
+void move(int command, int speed){
+//Move specific motor at speed and direction
+//motor: 0 for B 1 for A
+//speed: 0 is off, and 255 is full speed
+//direction: 0 clockwise, 1 counter-clockwise
+
+  arduino.digitalWrite(STBY, Arduino.HIGH); //disable standby
+
+  int leftPin1 = Arduino.LOW;
+  int leftPin2 = Arduino.HIGH;
+  int rightPin1 = Arduino.HIGH;
+  int rightPin2 = Arduino.LOW;
+  
+  /*
+  if(direction == 1){
+    leftPin1 = HIGH;
+    leftPin2 = LOW;
+  }
+  */
+  
+  if(xPressed){
+      leftPin1 = Arduino.LOW;
+      leftPin2 = Arduino.HIGH;
+      rightPin1 = Arduino.LOW;
+      rightPin2 = Arduino.HIGH;
+      
+      arduino.digitalWrite(LeftIN1, leftPin1);
+      arduino.digitalWrite(LeftIN2, leftPin2);
+      arduino.analogWrite(PWMLeft, speed);
+      
+      arduino.digitalWrite(RightIN1, rightPin1);
+      arduino.digitalWrite(RightIN2, rightPin2);
+      arduino.analogWrite(PWMRight, speed);
+  }
+  else if(bPressed){
+      leftPin1 = HIGH;
+      leftPin2 = LOW;
+      rightPin1 = HIGH;
+      rightPin2 = LOW;
+      
+      arduino.digitalWrite(LeftIN1, leftPin1);
+      arduino.digitalWrite(LeftIN2, leftPin2);
+      arduino.analogWrite(PWMLeft, speed);
+      
+      arduino.digitalWrite(RightIN1, rightPin1);
+      arduino.digitalWrite(RightIN2, rightPin2);
+      arduino.analogWrite(PWMRight, speed);
+  }
+  
+  else{
+    int tempSpeed = 0;
+    int leftSpeed = 0;
+    int rightSpeed = 0;
+    //forward
+    if(leftJoystickY >= 0){
+      leftPin1 = Arduino.HIGH;
+      leftPin2 = Arduino.LOW;
+      rightPin1 = Arduino.LOW;
+      rightPin2 = Arduino.HIGH;
+      tempSpeed = (int)(MAX_SPEED/1.5 * leftJoystickY);            
+    }else if(leftJoystickY < 0){ //backward
+      leftPin1 = Arduino.LOW;
+      leftPin2 = Arduino.HIGH;
+      rightPin1 = Arduino.HIGH;
+      rightPin2 = Arduino.LOW;
+      tempSpeed = (int)(MAX_SPEED/1.5 * -leftJoystickY);
+    }
+    /*
+    //left
+    if(leftJoystickX < 0){
+      leftSpeed = tempSpeed + (int)(tempSpeed * leftJoystickX);
+      rightSpeed = tempSpeed;
+      println("Left speed: " + leftSpeed + "Right speed: " + rightSpeed);   
+    }else if(leftJoystickX >= 0){
+      rightSpeed = tempSpeed + (int)(tempSpeed * -leftJoystickX);
+      leftSpeed = tempSpeed;
+      println("Left speed: " + leftSpeed + "Right speed: " + rightSpeed); 
+    }
+    //right
+    */
+    if(leftJoystickX < 0){
+      rightSpeed = (int)((tempSpeed) + (MAX_SPEED/1.5 * -leftJoystickX));
+      leftSpeed = tempSpeed;
+      //println("Left speed: " + leftSpeed + "Right speed: " + rightSpeed);   
+    }else if(leftJoystickX >= 0){
+      leftSpeed = (int)((tempSpeed) + (MAX_SPEED/1.5 * leftJoystickX));
+      rightSpeed = tempSpeed;
+      //println("Left speed: " + leftSpeed + "Right speed: " + rightSpeed); 
+    }
+    
+    
+      arduino.digitalWrite(LeftIN1, leftPin1);
+      arduino.digitalWrite(LeftIN2, leftPin2);
+      arduino.analogWrite(PWMLeft, leftSpeed);
+      
+      arduino.digitalWrite(RightIN1, rightPin1);
+      arduino.digitalWrite(RightIN2, rightPin2);
+      arduino.analogWrite(PWMRight, rightSpeed);
+  }
+  
+  /*
+  switch(command){
+    case left:
+      leftPin1 = Arduino.LOW;
+      leftPin2 = Arduino.HIGH;
+      rightPin1 = Arduino.LOW;
+      rightPin2 = Arduino.HIGH;
+      
+      arduino.digitalWrite(LeftIN1, leftPin1);
+      arduino.digitalWrite(LeftIN2, leftPin2);
+      arduino.analogWrite(PWMLeft, speed);
+      
+      arduino.digitalWrite(RightIN1, rightPin1);
+      arduino.digitalWrite(RightIN2, rightPin2);
+      arduino.analogWrite(PWMRight, speed);
+      break;
+      
+    case right:
+      leftPin1 = HIGH;
+      leftPin2 = LOW;
+      rightPin1 = HIGH;
+      rightPin2 = LOW;
+      
+      arduino.digitalWrite(LeftIN1, leftPin1);
+      arduino.digitalWrite(LeftIN2, leftPin2);
+      arduino.analogWrite(PWMLeft, speed);
+      
+      arduino.digitalWrite(RightIN1, rightPin1);
+      arduino.digitalWrite(RightIN2, rightPin2);
+      arduino.analogWrite(PWMRight, speed);
+      break;
+      
+    case forward:
+      leftPin1 = LOW;
+      leftPin2 = HIGH;
+      rightPin1 = HIGH;
+      rightPin2 = LOW;
+      
+      arduino.digitalWrite(LeftIN1, leftPin1);
+      arduino.digitalWrite(LeftIN2, leftPin2);
+      arduino.analogWrite(PWMLeft, speed);
+      
+      arduino.digitalWrite(RightIN1, rightPin1);
+      arduino.digitalWrite(RightIN2, rightPin2);
+      arduino.analogWrite(PWMRight, speed);
+      break;
+      
+    case backward:
+      leftPin1 = HIGH;
+      leftPin2 = LOW;
+      rightPin1 = LOW;
+      rightPin2 = HIGH;
+      
+      arduino.digitalWrite(LeftIN1, leftPin1);
+      arduino.digitalWrite(LeftIN2, leftPin2);
+      arduino.analogWrite(PWMLeft, speed);
+      
+      arduino.digitalWrite(RightIN1, rightPin1);
+      arduino.digitalWrite(RightIN2, rightPin2);
+      arduino.analogWrite(PWMRight, speed);
+      break;
+      
+    default:
+       stop();
+  
+  }
+  */
+}
+
+void stop(){
+//enable standby  
+  arduino.digitalWrite(STBY, Arduino.LOW);
 }
 
 void getControllerState(){
@@ -118,6 +363,25 @@ void getControllerState(){
   
   checkBumpers();
   
+  checkTriggers();
+  
+}
+
+void checkTriggers(){
+ if(leftZ() > 0.1 && !ltPressed){
+  println("Left trigger pressed");
+    ltPressed = true; 
+  }
+  else if(leftZ() <= 0.1){
+   ltPressed = false; 
+  } 
+ if(rightZ() > 0.1 && !rtPressed){
+  println("Right trigger pressed"); 
+    rtPressed = true; 
+  }
+  else if(rightZ() <= 0.1){
+   rtPressed = false; 
+  } 
 }
 
 void checkBumpers(){
@@ -181,29 +445,37 @@ void checkRightJoyStick(){
 
 void checkDPad(){
   if(DUp() && !dUpPressed){
-   println("Up on DPad pressed");
+   println("Up on DPad pressed: " + clawUpVal);
    dUpPressed = true; 
+   arduino.analogWrite(ClawUp, clawUpVal);
+   clawUpVal += 10;
   }
   else if(!DUp()){
    dUpPressed = false; 
   }
   if(DDown() && !dDownPressed){
-   println("Down on DPad pressed");
+   println("Down on DPad pressed: " + clawUpVal);
    dDownPressed = true; 
+    arduino.analogWrite(ClawUp, clawUpVal);
+   clawUpVal -= 10;
   }
   else if(!DDown()){
    dDownPressed = false;  
   }
   if(DLeft() && !dLeftPressed){
-   println("Left on DPad pressed"); 
+   println("Left on DPad pressed: " + clawOpenVal); 
    dLeftPressed = true; 
+    arduino.analogWrite(ClawOpen, clawOpenVal);
+   clawOpenVal += 10;
   }
   else if(!DLeft()){
    dLeftPressed = false; 
   }  
   if(DRight() && !dRightPressed){
-   println("Right on DPad pressed"); 
+   println("Right on DPad pressed: " + clawOpenVal); 
    dRightPressed = true; 
+   arduino.analogWrite(ClawOpen, clawOpenVal);
+   clawOpenVal -= 10;
   }
   else if(!DRight()){
    dRightPressed = false; 
@@ -330,7 +602,7 @@ void mapXBOXwindows()
   Select = gamepad.getButton(6);
   Start = gamepad.getButton(7);
   
-  gamepad.setTolerance(0.05f);  //was 0.5f.
+  gamepad.setTolerance(0.1f);  //was 0.5f.
   
   
   /*
