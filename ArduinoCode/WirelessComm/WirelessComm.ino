@@ -58,8 +58,8 @@ Servo cameraPanServo, cameraTiltServo;
 #define STEP_SIZE 1
 #define PAN_MIN 20
 #define PAN_MAX 160
-#define TILT_MIN 90
-#define TILT_MAX 160
+#define TILT_MIN 20
+#define TILT_MAX 85
 
 #define DELAY 700
 
@@ -85,7 +85,7 @@ void setup() {
   
   // Setup pins
   pinMode(STANDBY, OUTPUT);
-  pinMode(CAM_POW, OUTPUT);
+  //pinMode(CAM_POW, OUTPUT);
 
   pinMode(PWM_LEFT, OUTPUT);
   pinMode(LEFT_IN1, OUTPUT);
@@ -109,14 +109,15 @@ void setup() {
   opening = closing = raising = lowering = spinLeft = spinRight = false;
   panLeft = panRight = tiltUp = tiltDown = false;
   
-  digitalWrite(CAM_POW, HIGH);
+  //digitalWrite(CAM_POW, HIGH);
   
-  // pick up the initial sensor
   clawOpenServo.write(OPEN_MAX);
   clawUpServo.write(UP_MAX);
-  delay(100);
+  delay(2000);
   clawOpenServo.write(OPEN_MIN);
+  delay(2000);
   clawUpServo.write(UP_MIN);
+  
 }
 
 
@@ -222,7 +223,7 @@ void handleCamera(){
 int readCommand() {
   int b = Serial.read();
   if (b == BEGIN_COMMAND) {
-]    command[0] = readByte();
+    command[0] = readByte();
     command[1] = readByte();
     command[2] = readByte();
     return 1;
@@ -416,16 +417,17 @@ void executeCommand() {
   // Centers camera
   if (button_com & A_BUTTON){
     Serial.println("Centering Camera");
-    camTiltVal = 90;
+    camTiltVal = 85;
     camPanVal = 90;
     cameraTiltServo.write(camTiltVal);
     cameraPanServo.write(camPanVal);
   }
   
-  if (button_com & A_BUTTON){
+  // Centers camera on the claw
+  if (button_com & Y_BUTTON){
     Serial.println("Centering Camera On Claw");
-    camTiltVal = 110;
-    camPanVal = 110;
+    camTiltVal = 40;
+    camPanVal = 120;
     cameraTiltServo.write(camTiltVal);
     cameraPanServo.write(camPanVal);
   }
